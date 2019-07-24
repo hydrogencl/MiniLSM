@@ -152,8 +152,19 @@ int main (){
 	// Missing : 1) Radiative transfer scheme
 	//	     2) Soil Moisture
 	//	     3) Leaf temperature
+	// LWout =  BoltzmannK * pow(TempAir,4) ; 
+	// double Rnet    = arr_fsds[n] - BoltzmannK * pow(Temp,4) ; 
 
+	double TempAir, Rnet, uz, pres, G                ;
 
+	double ea, delta, gamma, es, rs, ra, ET ;
+	
+	double rho_air = 1.2041                 ;
+	double LAI     = 2.0                    ;
+	double vegH    = 0.5                    ;
+	double BoltzmannK = 5.67 * pow(10,-8)   ;
+	
+	
 	vector <double> arr_temp = ReadingWeatherCSV ("./weather_input.csv",0);
 	vector <double> arr_pres = ReadingWeatherCSV ("./weather_input.csv",1);
 	vector <double> arr_humi = ReadingWeatherCSV ("./weather_input.csv",2);
@@ -162,26 +173,22 @@ int main (){
 	vector <double> arr_prec = ReadingWeatherCSV ("./weather_input.csv",5);
 
 	for (int n=0; n<arr_temp.size(); n++){
-	double BoltzmannK = 5.67 * pow(10,-8);
-	double TempAir = arr_temp[n] ;
+		TempAir = arr_temp[n] ;
 	//  LWout =  BoltzmannK * pow(TempAir,4) ; 
 	//double Rnet    = arr_fsds[n] - BoltzmannK * pow(Temp,4) ; 
-	double Rnet    = arr_fsds[n] ; 
-	double uz      = arr_wind[n] ;
-	double pres    = arr_pres[n] ;
-	double G       = arr_fsds[n] * 0.05 ;
-	double rho_air = 1.2041      ;
-	double ea      = humid2vapour(arr_humi[n], pres) ;
-	double LAI     = 2.0                    ;
-	double vegH    = 0.5                    ;
-	double delta = SlopeVapourCurve(TempAir)   ;
+		Rnet    = arr_fsds[n] ; 
+		uz      = arr_wind[n] ;
+		pres    = arr_pres[n] ;
+		G       = arr_fsds[n] * 0.05 ;
+		ea      = humid2vapour(arr_humi[n], pres) ;
+		delta = SlopeVapourCurve(TempAir)   ;
 	//cout << SlopeVapourCurve(283.6) << endl  ;
-	double gamma = psychrometric(pres)         ;
-	double es = saturatedvapour(TempAir, pres )       ;
-	double rs = canopyRes( 40,   Rnet, es, ea, TempAir, LAI, pres) ;
-	double ra = surfaceRes (uz, 2.0, 2.0, vegH);
-	double ET = PenmanMonteith (Rnet, G, delta, gamma, TempAir, uz, es, ea, rho_air, rs, ra); 
-	cout << "Time: " << n << " InSWRadia: " << Rnet <<  " ET= " << ET << " W m^-1" << endl   ;
+		gamma = psychrometric(pres)         ;
+		es = saturatedvapour(TempAir, pres )       ;
+		rs = canopyRes( 40,   Rnet, es, ea, TempAir, LAI, pres) ;
+		ra = surfaceRes (uz, 2.0, 2.0, vegH);
+		ET = PenmanMonteith (Rnet, G, delta, gamma, TempAir, uz, es, ea, rho_air, rs, ra); 
+		cout << "Time: " << n << " InSWRadia: " << Rnet <<  " ET= " << ET << " W m^-1" << endl   ;
 	}
 	return 0;
 }
